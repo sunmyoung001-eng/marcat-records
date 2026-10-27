@@ -51,6 +51,7 @@ jobs:
           PYTHONPATH: .
           PYTHONUNBUFFERED: "1"
           PUBLIC_DIR: ${{ github.workspace }}/public/records
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python scripts/run_daily.py ${{ steps.guard.outputs.arg }}
       - name: Save engine state (private repo) then publish record (this repo)
         if: steps.guard.outputs.run == '1'
