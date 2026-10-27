@@ -17,7 +17,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - name: Window guard
         id: guard
@@ -49,6 +49,7 @@ jobs:
         working-directory: engine
         env:
           PYTHONPATH: .
+          PYTHONUNBUFFERED: "1"
           PUBLIC_DIR: ${{ github.workspace }}/public/records
         run: python scripts/run_daily.py ${{ steps.guard.outputs.arg }}
       - name: Save engine state (private repo) then publish record (this repo)
