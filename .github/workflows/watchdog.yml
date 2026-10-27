@@ -1,0 +1,26 @@
+name: missing-publish-check
+on:
+  schedule: [{ cron: "30 14 * * 1-5" }]   # ~09:30-10:30 ET, after the publish window
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail (-> email) if the last completed trading day has no record
+        run: |
+          python3 - <<'PY'
+          import datetime as d, zoneinfo, pathlib, sys
+          # NYSE full-day closures (update yearly)
+          HOL = {d.date.fromisoformat(x) for x in """2026-01-01 2026-01-19 2026-02-16 2026-04-03 2026-05-25 2026-06-19 2026-07-03 2026-09-07 2026-11-26 2026-12-25
+          2027-01-01 2027-01-18 2027-02-15 2027-03-26 2027-05-31 2027-06-18 2027-07-05 2027-09-06 2027-11-25 2027-12-24""".split()}
+          t = d.datetime.now(zoneinfo.ZoneInfo("America/New_York")); today = t.date()
+          if t.hour < 9 or today.weekday() > 4 or today in HOL:
+              print("no publish expected now:", t.isoformat()); sys.exit(0)
+          if today.year > 2027: print("holiday list expired: update watchdog.yml"); sys.exit(1)
+          prev = today - d.timedelta(days=1)
+          while prev.weekday() > 4 or prev in HOL: prev -= d.timedelta(days=1)
+          ok = pathlib.Path(f"records/{prev}.json").exists()
+          print("expected", prev, "found", ok); sys.exit(0 if ok else 1)
+          PY

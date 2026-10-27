@@ -1,0 +1,59 @@
+name: daily-forecast
+on:
+  schedule:            # GitHub cron is UTC and can lag 5-30 min; the guard step below keeps only the run inside 08:00-09:15 ET
+    - cron: "35 12 * * 1-5"   # 08:35 ET during EDT
+    - cron: "35 13 * * 1-5"   # 08:35 ET during EST
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run outside the publish window (test only)"
+        type: boolean
+        default: false
+concurrency:
+  group: daily-forecast
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Window guard
+        id: guard
+        env:
+          EVENT: ${{ github.event_name }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          H=$((10#$(TZ=America/New_York date +%H%M))); D=$(TZ=America/New_York date +%u)
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$FORCE" = "true" ]; then echo "run=1" >> "$GITHUB_OUTPUT"; echo "arg=--force" >> "$GITHUB_OUTPUT"
+          elif [ "$D" -le 5 ] && [ "$H" -ge 800 ] && [ "$H" -lt 915 ]; then echo "run=1" >> "$GITHUB_OUTPUT"; echo "arg=" >> "$GITHUB_OUTPUT"
+          else echo "run=0" >> "$GITHUB_OUTPUT"; echo "outside publish window (ET $H, weekday $D): nothing to do"; fi
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.run == '1'
+        with: { path: public }
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.run == '1'
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          path: engine
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.run == '1'
+        with: { python-version: "3.12" }
+      - name: Install
+        if: steps.guard.outputs.run == '1'
+        run: pip install --quiet numpy pandas requests
+      - name: Run engine
+        if: steps.guard.outputs.run == '1'
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+          PUBLIC_DIR: ${{ github.workspace }}/public/records
+        run: python scripts/run_daily.py ${{ steps.guard.outputs.arg }}
+      - name: Save engine state (private repo) then publish record (this repo)
+        if: steps.guard.outputs.run == '1'
+        run: |
+          git config --global user.name marcat-bot; git config --global user.email bot@users.noreply.github.com
+          (cd engine && git add data records && (git commit -q -m "state $(date -u +%F)" && git push -q) || echo "engine: nothing to commit")
+          (cd public && git add records && (git commit -q -m "forecast $(TZ=America/New_York date +%F)" && git push -q) || echo "public: nothing to commit")
