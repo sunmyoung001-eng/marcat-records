@@ -1,0 +1,55 @@
+name: marCat Official Event Source Read-only Probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/official-event-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests
+      - name: Test official feeds (no raw records or keys logged)
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,requests,xml.etree.ElementTree as ET,json
+          sources=[
+            ("BLS_ICS","https://www.bls.gov/schedule/news_release/bls.ics"),
+            ("FED_MONETARY","https://www.federalreserve.gov/feeds/press_monetary.xml"),
+            ("FED_ALL","https://www.federalreserve.gov/feeds/press_all.xml")]
+          for label,url in sources:
+              try:
+                  r=requests.get(url,timeout=15,headers={"User-Agent":"marCatResearch/1.0 (public-data-readonly; contact: project webpage)"})
+                  status=r.status_code
+                  count=0
+                  if status==200 and len(r.content)<=3_000_000:
+                      if label=="BLS_ICS":
+                          count=r.text.count("BEGIN:VEVENT")
+                      else:
+                          root=ET.fromstring(r.content)
+                          count=len(root.findall(".//item"))
+                  print(json.dumps({"feed":label,"http":status,"entries":count,
+                                    "valid": status==200 and count>0}))
+              except Exception as e:
+                  print(json.dumps({"feed":label,"error":type(e).__name__,"valid":False}))
+          try:
+              key=os.getenv("FRED_API_KEY","")
+              if not key: raise ValueError("no credential")
+              r=requests.get("https://api.stlouisfed.org/fred/releases/dates",
+                  params={"api_key":key,"file_type":"json","include_release_dates_with_no_data":"true",
+                          "limit":1000,"sort_order":"desc"},timeout=15)
+              parsed=r.json() if r.status_code==200 else {}
+              dates=parsed.get("release_dates",[])
+              print(json.dumps({"feed":"FRED_CALENDAR","http":r.status_code,
+                                "entries":len(dates),"valid":r.status_code==200 and len(dates)>0}))
+          except Exception as e:
+              print(json.dumps({"feed":"FRED_CALENDAR","error":type(e).__name__,"valid":False}))
+          PY
