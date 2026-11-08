@@ -37,6 +37,16 @@ jobs:
         env:
           ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
         run: python engine/scripts/push_newsroom_snapshot.py --input "${RUNNER_TEMP}/newsroom-snapshot.json"
+      - name: Verify private archived bytes and build MasterCat inbox
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python scripts/prepare_mastercat_inbox.py --snapshot "${RUNNER_TEMP}/newsroom-snapshot.json" --output "${RUNNER_TEMP}/mastercat-inbox.json"
+      - name: Append observation-only inbox to private branch
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python engine/scripts/push_newsroom_snapshot.py --kind mastercat-inbox --input "${RUNNER_TEMP}/mastercat-inbox.json"
       - name: Erase ephemeral observations
         if: always()
-        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json"
+        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json" "${RUNNER_TEMP}/mastercat-inbox.json"
