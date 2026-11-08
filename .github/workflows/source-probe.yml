@@ -21,6 +21,42 @@ jobs:
           python-version: '3.12'
       - name: Install read-only clients
         run: python -m pip install numpy pandas requests
+      - name: Validate FRED API key without exposing credentials
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os, re, requests
+          from urllib.parse import urlencode
+
+          key = os.environ.get("FRED_API_KEY", "").strip()
+          print("fred_secret_present=" + str(bool(key)).lower())
+          valid_format = bool(re.fullmatch(r"[a-z0-9]{32}", key))
+          print("fred_key_format_valid=" + str(valid_format).lower())
+          if not valid_format:
+              print("fred_credential_status=bad_format_or_missing")
+              raise SystemExit(1)
+          params = {"series_id": "UNRATE", "api_key": key, "file_type": "json", "limit": 1}
+          url = "https://api.stlouisfed.org/fred/series/observations?" + urlencode(params)
+          try:
+              response = requests.get(url, timeout=12)
+              print("fred_api_http_status=" + str(response.status_code))
+              if response.status_code != 200:
+                  try:
+                      msg = str(response.json().get("error_message", "")).lower()
+                  except ValueError:
+                      msg = ""
+                  category = ("not_registered" if "not registered" in msg or "not valid" in msg
+                              else "key_not_set" if "api_key" in msg and "not been set" in msg
+                              else "key_rejected" if "api_key" in msg
+                              else "other_http_error")
+                  print("fred_credential_status=" + category)
+                  raise SystemExit(1)
+              print("fred_credential_status=accepted")
+          except requests.RequestException as exc:
+              print("fred_credential_status=request_error_" + type(exc).__name__)
+              raise SystemExit(1)
+          PY
       - name: Verify sources with existing publish-runner FRED key
         working-directory: engine
         env:
