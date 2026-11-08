@@ -44,3 +44,19 @@ jobs:
           for rid,name in sorted(picked.items()):
               print(json.dumps({'release_id':rid,'release_name':name[:110],'seed':rid in selected}))
           PY
+
+      - name: Probe historical FOMC press-release listings
+        run: |
+          python - <<'PY'
+          import requests,re,json
+          from html import unescape
+          for year in [1996,2000,2005,2010,2015,2020,2024,2026]:
+              url=f'https://www.federalreserve.gov/newsevents/pressreleases/{year}-press-fomc.htm'
+              try:
+                  r=requests.get(url,timeout=15,headers={'User-Agent':'marCat Historical Research/1.0'})
+                  a=set(re.findall(r'monetary(\\d{8})[a-z]?\\.htm',r.text,re.I))
+                  b=set(re.findall(r'fomcstatement(\\d{8})\\.htm',r.text,re.I))
+                  print(json.dumps({'year':year,'http':r.status_code,'fomc_dated_links':len(a|b),'samples':sorted(a|b)[:2]}))
+              except requests.RequestException as exc:
+                  print(json.dumps({'year':year,'error':type(exc).__name__}))
+          PY
