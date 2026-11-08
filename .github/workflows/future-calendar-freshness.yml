@@ -1,0 +1,30 @@
+name: marCat Calendar Freshness Watchdog
+on:
+  schedule:
+    - cron: '43 3,15 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fail-on-stale-calendar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify latest scheduled date snapshot newer than 24 hours
+        run: |
+          python - <<'PY'
+          import pathlib,json,datetime
+          p=pathlib.Path('calendar/upcoming.json')
+          if not p.is_file(): raise SystemExit('calendar_missing')
+          x=json.loads(p.read_text())
+          if x.get('schema')!='marcat-future-calendar-v1': raise SystemExit('calendar_bad_schema')
+          s=x.get('collected_at_utc','')
+          try: dt=datetime.datetime.fromisoformat(s.replace('Z','+00:00'))
+          except ValueError: raise SystemExit('calendar_bad_timestamp')
+          age=(datetime.datetime.now(datetime.timezone.utc)-dt).total_seconds()
+          print('calendar_age_minutes='+str(round(age/60)))
+          print('events='+str(x.get('event_count',0)))
+          if age< -300 or age>86400: raise SystemExit('calendar_stale_gt_24h')
+          print('calendar_freshness_healthy=true')
+          PY

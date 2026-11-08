@@ -1,0 +1,66 @@
+name: marCat Future Calendar Updates
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/future-calendar.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 1,5,9,13,17,21 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: marcat-future-calendar-updater
+  cancel-in-progress: false
+jobs:
+  publish-upcoming-dates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout public schedule repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Checkout private calendar engine with existing token
+        uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          ref: main
+          path: engine
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install read-only official-source HTTP client
+        run: python -m pip install requests
+      - name: Fetch 22 FRED future releases + official Fed meeting schedule
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          PYTHONPATH: engine
+        run: |
+          python engine/scripts/update_future_calendar.py --output calendar/upcoming.json --change-dir calendar/change-log
+          python engine/scripts/check_future_calendar_freshness.py --input calendar/upcoming.json
+      - name: Commit only publicly announced schedule dates and audit
+        run: |
+          set -euo pipefail
+          git config user.name "marcat-calendar-bot"
+          git config user.email "marcat-calendar-bot@users.noreply.github.com"
+          git add -- calendar/upcoming.json calendar/change-log/
+          if git diff --cached --quiet; then
+            echo "calendar unchanged"
+          else
+            git commit -m "CalendarCat official future schedule refreshed"
+            git push origin HEAD:main
+          fi
+      - name: Confirm public output is not a model / observation feed
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          x=json.loads(pathlib.Path('calendar/upcoming.json').read_text())
+          assert x['forecast_signal_approved'] is False
+          assert x['historical_results_included'] is False
+          assert all(e['scheduled_time_et'] is None for e in x['events'])
+          assert not any('actual_result' in e for e in x['events'])
+          print("calendar_public_dates_only=true")
+          PY
