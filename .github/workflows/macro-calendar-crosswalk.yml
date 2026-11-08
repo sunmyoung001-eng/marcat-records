@@ -1,0 +1,50 @@
+name: marCat Calendar to MacroCat Read-only Crosswalk
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/macro-calendar-crosswalk.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-live-macro-links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: calendar-records
+      - uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          ref: main
+          path: engine
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing macro source dependencies
+        run: python -m pip install numpy pandas requests
+      - name: Validate all published official event/date -> MacroCat roles
+        env:
+          PYTHONPATH: engine
+        run: |
+          python engine/scripts/map_calendar_macro.py --calendar calendar-records/calendar/upcoming.json --output "${RUNNER_TEMP}/macro-calendar-links.json"
+          python - <<'PY'
+          import json,os,pathlib
+          x=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"macro-calendar-links.json").read_text())
+          assert x["research_only"] is True
+          assert x["market_consensus_connected"] is False
+          assert x["published_forecast_changed"] is False
+          assert x["linked_event_count"]==len(x["links"]) and x["linked_event_count"]>0
+          assert x["existing_macro_source_count"]==7
+          assert all(e["approved_forecast_feature"] is False and
+                     e["consensus_status"]=="not_connected" for e in x["links"])
+          print("event_link_validation=passed")
+          print("market_consensus_connected=false")
+          print("published_forecast_changed=false")
+          PY
+      - name: Delete private research crosswalk
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/macro-calendar-links.json"
