@@ -1,6 +1,6 @@
 name: daily-forecast
 on:
-  schedule:            # GitHub cron is UTC and can lag 5-30 min; the guard step below keeps only the run inside 08:00-09:15 ET
+  schedule:            # GitHub UTC cron may be delayed by hours; fail missed window rather than backdate
     - cron: "35 12 * * 1-5"   # 08:35 ET during EDT
     - cron: "50 12 * * 1-5"   # 08:50 ET during EDT, guarded retry
     - cron: "35 13 * * 1-5"   # 08:35 ET during EST
@@ -64,6 +64,26 @@ jobs:
       - name: Save engine state (private repo) then publish record (this repo)
         if: steps.guard.outputs.run == '1'
         run: |
-          git config --global user.name marcat-bot; git config --global user.email bot@users.noreply.github.com
-          (cd engine && git add data records && (git commit -q -m "state $(date -u +%F)" && git push -q) || echo "engine: nothing to commit")
-          (cd public && git add records && (git commit -q -m "forecast $(TZ=America/New_York date +%F)" && git push -q) || echo "public: nothing to commit")
+          set -euo pipefail
+          git config --global user.name marcat-bot
+          git config --global user.email bot@users.noreply.github.com
+          (
+            cd engine
+            git add data records
+            if git diff --cached --quiet; then
+              echo "engine: no staged state changes"
+            else
+              git commit -q -m "state $(date -u +%F)"
+              git push -q
+            fi
+          )
+          (
+            cd public
+            git add records
+            if git diff --cached --quiet; then
+              echo "public: no staged forecast changes"
+            else
+              git commit -q -m "forecast $(TZ=America/New_York date +%F)"
+              git push -q
+            fi
+          )
