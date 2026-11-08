@@ -1,0 +1,32 @@
+name: marCat Read-only Provider Probe
+on:
+  push:
+    paths:
+      - '.github/workflows/source-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          path: engine
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install read-only clients
+        run: python -m pip install numpy pandas requests
+      - name: Verify sources with existing publish-runner FRED key
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python scripts/probe_source_intake.py --output "${RUNNER_TEMP}/marcat-source-health.json"
+          # Source values are never uploaded to this public repository.
+          rm -f "${RUNNER_TEMP}/marcat-source-health.json"
