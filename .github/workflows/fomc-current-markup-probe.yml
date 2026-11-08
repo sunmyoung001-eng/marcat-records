@@ -1,0 +1,25 @@
+name: marCat FOMC Future Calendar Markup Probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fomc-current-markup-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch official FOMC meeting schedule and expose only markup shape
+        run: |
+          python - <<'PY'
+          import urllib.request,re,json,html
+          u="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+          r=urllib.request.Request(u,headers={"User-Agent":"marCat FutureCalendar/1.0"})
+          raw=urllib.request.urlopen(r,timeout=15).read().decode("utf-8","replace")
+          for pattern in (r'fomc-meeting[^" >]*',r'2027 FOMC Meetings',r'2026 FOMC Meetings',r'(?i)January'):
+              hits=list(re.finditer(pattern,raw))
+              print(json.dumps({"pattern":pattern,"count":len(hits),"snippets":[re.sub(r'\s+',' ',raw[max(0,m.start()-240):m.end()+440])[:650] for m in hits[:2]]}))
+          print(json.dumps({"http":200,"bytes":len(raw),"titles":re.findall(r'<h[2-5][^>]*>(.*?)</h[2-5]>',raw,re.S)[:4]}))
+          PY
