@@ -1,0 +1,46 @@
+name: marCat Historical Event Catalog Probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/historical-event-catalog-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests
+      - name: Inspect official FRED release taxonomy and 30-year date coverage
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,requests,json,re
+          key=os.environ.get('FRED_API_KEY','')
+          root='https://api.stlouisfed.org/fred'
+          base={'api_key':key,'file_type':'json'}
+          a=requests.get(root+'/releases',params={**base,'limit':1000,'offset':0},timeout=25)
+          a.raise_for_status()
+          data=a.json()['releases']
+          patterns={'prices':r'consumer price|producer price|import.and.export.price',
+            'labour':r'employment situation|job openings|employment cost|weekly.*claims|initial claims|productivity',
+            'growth':r'gross domestic product|personal income|retail.*food|industrial production|manufacturing',
+            'housing':r'housing starts|new residential|existing home|building permits|construction',
+            'sentiment':r'consumer sentiment|consumer confidence|business outlook|purchasing managers',
+            'trade':r'international trade|trade in goods|durable goods|manufacturers.*shipments'}
+          picked={}
+          for x in data:
+              name=x.get('name','')
+              if any(re.search(p,name,re.I) for p in patterns.values()):
+                  picked[int(x['id'])]=name
+          selected={10,50,53,46,192}
+          print('catalog_count='+str(len(data)))
+          print('matched_release_count='+str(len(picked)))
+          for rid,name in sorted(picked.items()):
+              print(json.dumps({'release_id':rid,'release_name':name[:110],'seed':rid in selected}))
+          PY
