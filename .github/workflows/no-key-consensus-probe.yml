@@ -1,0 +1,55 @@
+name: marCat No-Key Consensus Source Probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/no-key-consensus-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: One keyless public Helious calendar request for private research feasibility
+        run: |
+          python - <<'PY'
+          import json,urllib.request,urllib.error
+          from collections import Counter
+          url="https://api.helious.io/v1/calendar?days_back=1&days_ahead=7&country=US"
+          req=urllib.request.Request(url,headers={"User-Agent":"marCat Private Macro Research Feasibility/1.0","Accept":"application/json"})
+          try:
+              with urllib.request.urlopen(req,timeout=22) as resp:
+                  status=resp.status
+                  data=json.loads(resp.read(1_000_000))
+          except urllib.error.HTTPError as exc:
+              print("consensus_probe_http_status="+str(exc.code))
+              raise SystemExit(1)
+          print("consensus_probe_http_status="+str(status))
+          print("root_keys="+json.dumps(sorted(data.keys())))
+          bucket=data.get("data",{})
+          print("data_shape="+type(bucket).__name__)
+          if not isinstance(bucket,dict):
+              raise SystemExit("bad_json_data_schema")
+          print("data_keys="+json.dumps(sorted(bucket.keys())))
+          rows=bucket.get("events")
+          if not isinstance(rows,list): raise SystemExit("no_event_array")
+          count=Counter(str(x.get("status")) for x in rows if isinstance(x,dict))
+          n_f=sum(bool(x.get("forecast")) for x in rows if isinstance(x,dict))
+          n_a=sum(bool(x.get("actual")) for x in rows if isinstance(x,dict))
+          print("event_rows="+str(len(rows)))
+          print("events_with_forecast="+str(n_f))
+          print("events_with_actual="+str(n_a))
+          print("event_statuses="+json.dumps(dict(count),sort_keys=True))
+          # Only public titles and scheduled dates; never log numeric provider data.
+          for x in rows[:6]:
+              if isinstance(x,dict):
+                  print(json.dumps({"title":str(x.get("title",""))[:80],
+                    "scheduled":str(x.get("datetime_utc",""))[:30],
+                    "has_forecast":x.get("forecast") is not None,
+                    "has_actual":x.get("actual") is not None,
+                    "country":x.get("country"),
+                    "keys":sorted(x.keys())},sort_keys=True))
+          print("no_provider_data_stored=true")
+          print("no_public_redistribution=true")
+          PY
