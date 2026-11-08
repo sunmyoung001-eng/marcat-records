@@ -1,8 +1,10 @@
 name: daily-forecast
 on:
-  schedule:            # GitHub cron is UTC and can lag 5-30 min; the guard step below keeps only the run inside 08:00-09:15 ET
+  schedule:            # GitHub UTC cron may be delayed by hours; fail missed window rather than backdate
     - cron: "35 12 * * 1-5"   # 08:35 ET during EDT
+    - cron: "50 12 * * 1-5"   # 08:50 ET during EDT, guarded retry
     - cron: "35 13 * * 1-5"   # 08:35 ET during EST
+    - cron: "50 13 * * 1-5"   # 08:50 ET during EST, guarded retry
   workflow_dispatch:
     inputs:
       force:
@@ -29,6 +31,11 @@ jobs:
           if [ "$EVENT" = "workflow_dispatch" ] && [ "$FORCE" = "true" ]; then echo "run=1" >> "$GITHUB_OUTPUT"; echo "arg=--force" >> "$GITHUB_OUTPUT"
           elif [ "$D" -le 5 ] && [ "$H" -ge 800 ] && [ "$H" -lt 915 ]; then echo "run=1" >> "$GITHUB_OUTPUT"; echo "arg=" >> "$GITHUB_OUTPUT"
           else echo "run=0" >> "$GITHUB_OUTPUT"; echo "outside publish window (ET $H, weekday $D): nothing to do"; fi
+      - name: Fail missed scheduled publish window (never backdate forecast)
+        if: github.event_name == 'schedule' && steps.guard.outputs.run != '1'
+        run: |
+          echo '::error::Scheduled run missed the safe 08:00-09:15 America/New_York publish window. No forecast was issued.'
+          exit 1
       - uses: actions/checkout@v4
         if: steps.guard.outputs.run == '1'
         with: { path: public }
@@ -52,10 +59,31 @@ jobs:
           PYTHONUNBUFFERED: "1"
           PUBLIC_DIR: ${{ github.workspace }}/public/records
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          TEST_RUN_ID: manual-${{ github.run_id }}
         run: python scripts/run_daily.py ${{ steps.guard.outputs.arg }}
       - name: Save engine state (private repo) then publish record (this repo)
         if: steps.guard.outputs.run == '1'
         run: |
-          git config --global user.name marcat-bot; git config --global user.email bot@users.noreply.github.com
-          (cd engine && git add data records && (git commit -q -m "state $(date -u +%F)" && git push -q) || echo "engine: nothing to commit")
-          (cd public && git add records && (git commit -q -m "forecast $(TZ=America/New_York date +%F)" && git push -q) || echo "public: nothing to commit")
+          set -euo pipefail
+          git config --global user.name marcat-bot
+          git config --global user.email bot@users.noreply.github.com
+          (
+            cd engine
+            git add data records
+            if git diff --cached --quiet; then
+              echo "engine: no staged state changes"
+            else
+              git commit -q -m "state $(date -u +%F)"
+              git push -q
+            fi
+          )
+          (
+            cd public
+            git add records
+            if git diff --cached --quiet; then
+              echo "public: no staged forecast changes"
+            else
+              git commit -q -m "forecast $(TZ=America/New_York date +%F)"
+              git push -q
+            fi
+          )
