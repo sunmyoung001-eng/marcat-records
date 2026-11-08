@@ -1,0 +1,80 @@
+name: marCat Isolated Live Engine Preflight
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/isolated-engine-preflight.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marcat-isolated-live-preflight
+  cancel-in-progress: false
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout private engine (no public records checkout)
+        uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          path: engine
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing engine dependencies
+        run: python -m pip install numpy pandas requests
+      - name: Run force test with explicit isolated ID and no public output
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+          PYTHONUNBUFFERED: '1'
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          TEST_RUN_ID: 'diagnostic-${{ github.run_id }}'
+        run: |
+          set +e
+          python scripts/run_daily.py --force > "${RUNNER_TEMP}/preflight-private.log" 2>&1
+          RC=$?
+          set -e
+          python - "$RC" <<'PY'
+          import json,os,pathlib,sys
+          lines=pathlib.Path(os.environ['RUNNER_TEMP'],'preflight-private.log').read_text(errors='replace').splitlines()
+          found=None
+          for line in reversed(lines):
+              try:
+                  obj=json.loads(line)
+              except (ValueError,TypeError):
+                  continue
+              if isinstance(obj,dict) and 'status' in obj:
+                  found=obj
+                  break
+          stages=['intake close','intake vix','intake vix3m','asia','ext + snapshot']
+          for stage in stages:
+              print('stage_'+stage.replace(' ','_').replace('+','and')+'='+str(any('[step] '+stage in ln for ln in lines)).lower())
+          code=int(sys.argv[1])
+          status=found.get('status','unknown') if found else 'crash_before_status'
+          reason=str(found.get('why','')) if found else ''
+          category=('test_run_id_missing' if 'test_run_id' in reason else
+                    'source_mismatch' if 'mismatch' in reason else
+                    'data_missing' if 'no completed bar' in reason else
+                    'record_conflict' if 'record' in reason else
+                    'engine_exit_unclassified' if code else 'none')
+          print('isolated_engine_status='+status)
+          print('failure_category='+category)
+          print('official_publication_attempted=false')
+          print('public_record_written=false')
+          print('raw_provider_data_logged=false')
+          if status!='test_written' or code!=0:
+              raise SystemExit(1)
+          PY
+      - name: Assert tracked source data/forecast records unchanged
+        working-directory: engine
+        run: |
+          if git status --porcelain -- data records | grep .; then
+            echo 'unexpected tracked data change'; exit 1
+          fi
+          echo 'tracked_source_data_unchanged=true'
+      - name: Remove private temporary log
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/preflight-private.log"
