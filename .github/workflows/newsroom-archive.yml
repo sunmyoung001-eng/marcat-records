@@ -1,0 +1,42 @@
+name: marCat Private Newsroom Snapshot
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/newsroom-archive.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marcat-private-newsroom-archive
+  cancel-in-progress: false
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout private marCat code only
+        uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          ref: main
+          path: engine
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install read-only provider clients
+        run: python -m pip install numpy pandas requests
+      - name: Fetch, validate and build private observation reports
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python scripts/archive_newsroom_snapshot.py --output "${RUNNER_TEMP}/newsroom-snapshot.json"
+      - name: Create-only archive in private marCat repository
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python engine/scripts/push_newsroom_snapshot.py --input "${RUNNER_TEMP}/newsroom-snapshot.json"
+      - name: Erase ephemeral observations
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json"
