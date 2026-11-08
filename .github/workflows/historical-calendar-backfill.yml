@@ -1,0 +1,50 @@
+name: marCat Private Historical Calendar Backfill
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/historical-calendar-backfill.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marcat-private-historical-calendar-backfill
+  cancel-in-progress: false
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout private marCat engine only
+        uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          ref: main
+          path: engine
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install read-only historical source HTTP client
+        run: python -m pip install requests
+      - name: Research-only historic backfill (1996 to today ET)
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python scripts/backfill_historical_calendar.py --output "${RUNNER_TEMP}/marcat-calendar-history"
+      - name: Verify CalendarCat research retrieval for 2008 and 2020
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+        run: |
+          python scripts/query_historical_calendar.py --directory "${RUNNER_TEMP}/marcat-calendar-history" --start 2008-09-01 --end 2008-09-30 --output "${RUNNER_TEMP}/calendar-2008-research.json"
+          python scripts/query_historical_calendar.py --directory "${RUNNER_TEMP}/marcat-calendar-history" --start 2020-03-01 --end 2020-03-31 --output "${RUNNER_TEMP}/calendar-2020-research.json"
+      - name: Append yearly files and manifest only to private GitHub branch
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python scripts/push_historical_calendar.py --directory "${RUNNER_TEMP}/marcat-calendar-history"
+      - name: Erase temporary provider historical records
+        if: always()
+        run: rm -rf "${RUNNER_TEMP}/marcat-calendar-history" "${RUNNER_TEMP}/calendar-2008-research.json" "${RUNNER_TEMP}/calendar-2020-research.json"
