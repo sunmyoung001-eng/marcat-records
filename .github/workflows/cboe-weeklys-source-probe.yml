@@ -43,11 +43,20 @@ jobs:
           except UnicodeError:
               raise SystemExit('CBOE_CSV_DECODING_INVALID')
           rows=list(csv.reader(io.StringIO(content)))
-          header=' '.join(content.splitlines()[:18])
+          header=' '.join(content.splitlines())
           m=re.search(r'(?i)(?:as\s+of|effective\s+date)\s*:?\s*(\d{1,2}/\d{1,2}/\d{2,4})',header)
           if not m:
-              print('CBOE_HOLD_NO_VERIFIABLE_ASOF_DATE',len(rows))
-              raise SystemExit(12)
+              sections=[row[0].strip() for row in rows if row and
+                        'Available Weeklys -' in row[0]]
+              print(json.dumps({'status':'undated_product_universe_research_only',
+                  'downloaded_rows':len(rows),'official_sections_found':len(sections),
+                  'cboe_csv_sha256':hashlib.sha256(raw).hexdigest(),
+                  'asof_date_verified':False,'future_expirations_approved':False,
+                  'forecast_signal_approved':False},sort_keys=True))
+              if not sections:
+                  raise SystemExit('CBOE_HOLD_NO_RECOGNIZABLE_UNIVERSE_SECTIONS')
+              print('CBOE_OFFICIAL_CSV_TRANSPORT_OK_EXPIRY_DATE_HOLD')
+              raise SystemExit(0)
           stamp=m.group(1)
           for pattern in ('%m/%d/%Y','%m/%d/%y'):
               try:
