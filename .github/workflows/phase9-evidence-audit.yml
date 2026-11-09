@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sunmyoung001-eng/marcat
-          token: \${{ secrets.ENGINE_TOKEN }}
+          token: ${{ secrets.ENGINE_TOKEN }}
           ref: main
           path: engine
           persist-credentials: false
@@ -36,7 +36,7 @@ jobs:
         run: python -m pip install --quiet numpy pandas requests
       - name: Read immutable private evidence and evaluate source dates
         env:
-          ENGINE_TOKEN: \${{ secrets.ENGINE_TOKEN }}
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
           PYTHONPATH: engine
         run: python engine/scripts/audit_phase9_live.py --calendar public/calendar/upcoming.json
       - name: Ensure no public provider artifacts remain
