@@ -1,0 +1,49 @@
+name: marCat Treasury FiscalData Auction Date Research Probe
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/treasury-auction-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-treasury-auction-dates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout private CalendarCat research code
+        uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          ref: main
+          path: engine
+          persist-credentials: false
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install only HTTP client
+        run: python -m pip install requests
+      - name: Fetch FiscalData official 2026 auctions as private research
+        env:
+          PYTHONPATH: engine
+        run: |
+          python engine/scripts/probe_treasury_auctions.py --year 2026 --output "$RUNNER_TEMP/treasury-2026-private.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["RUNNER_TEMP"])/"treasury-2026-private.json").read_text())
+          assert d["schema"]=="marcat-treasury-auction-dates-v1"
+          assert d["event_count"]>=1
+          assert d["source_reported_records"]>=d["event_count"]
+          assert d["first_publication_time_verified"] is False
+          assert d["historical_asof_eligible"] is False
+          assert d["model_forecast_modified"] is False
+          assert d["public_records_modified"] is False
+          assert all(x["forecast_signal_approved"] is False for x in d["events"])
+          print("TREASURY_PRIVATE_NONPREDICTIVE_DATES_READBACK_VERIFIED")
+          PY
+      - name: Remove source research temp data
+        if: always()
+        run: rm -f "$RUNNER_TEMP/treasury-2026-private.json"
