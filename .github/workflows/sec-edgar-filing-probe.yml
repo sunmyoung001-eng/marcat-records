@@ -1,0 +1,71 @@
+name: marCat SEC EDGAR 8-K 10-K 10-Q Research-Only Pilot
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/sec-edgar-filing-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marcat-sec-edgar-pilot
+  cancel-in-progress: false
+jobs:
+  archive-official-sec-filing-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout private SEC parser and append-only archive code
+        uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          ref: main
+          path: engine
+          persist-credentials: false
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install SEC API HTTP adapter
+        run: python -m pip install requests
+      - name: Read official SEC metadata for AAPL and NVDA; private archive only
+        shell: bash
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+          PYTHONPATH: engine
+        run: |
+          set -euo pipefail
+          for ticker in AAPL NVDA; do
+            export TICKER="${ticker}"
+            path="$RUNNER_TEMP/sec-${ticker}-private.json"
+            python engine/scripts/probe_sec_edgar.py --ticker "${ticker}" --output "${path}"
+            python - <<'PY'
+          import json,os
+          from pathlib import Path
+          ticker=os.environ['TICKER']
+          p=Path(os.environ['RUNNER_TEMP'])/f'sec-{ticker}-private.json'
+          v=json.loads(p.read_text())
+          assert v['schema']=='marcat-sec-edgar-events-v1'
+          assert v['classification']=='private_retrospective_sec_acceptances_only'
+          assert v['issuer']==ticker
+          assert v['event_count']>0 and v['event_count']==len(v['events'])
+          assert v['first_public_dissemination_verified'] is False
+          assert v['historical_asof_eligible'] is False
+          assert v['model_forecast_modified'] is False
+          assert v['public_records_modified'] is False
+          assert all(e['issuer_ticker']==ticker and e['form'] in ('8-K','10-Q','10-K')
+                     and e['first_public_dissemination_verified'] is False
+                     and e['historical_original_vintage_verified'] is False
+                     and e['backtest_asof_eligible'] is False
+                     and e['forecast_signal_approved'] is False for e in v['events'])
+          print('SEC_RESEARCH_ONLY_YEAR_VERIFY',ticker,v['event_count'])
+          PY
+            python engine/scripts/push_newsroom_snapshot.py --kind sec-filings --input "${path}"
+            rm -f "${path}"
+            sleep 2
+          done
+      - name: Do not retain SEC data on public runner workspace
+        if: always()
+        run: |
+          test ! -e sec-public-provider-data.json
+          rm -f "$RUNNER_TEMP"/sec-*-private.json
