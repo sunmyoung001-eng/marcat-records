@@ -1,4 +1,6 @@
 name: marCat Private Newsroom Snapshot
+# MARCAT-058 one-shot replay to record exact previous observation dates.
+# Trigger remains scoped to workflow-file changes; public forecast still locked.
 on:
   push:
     branches: [main]
