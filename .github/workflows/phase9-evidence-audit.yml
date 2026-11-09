@@ -1,0 +1,46 @@
+name: marCat Phase 9 Private Evidence Audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/phase9-evidence-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marcat-phase9-private-audit
+  cancel-in-progress: false
+jobs:
+  audit-private-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout public calendar dates only
+        uses: actions/checkout@v4
+        with:
+          path: public
+          persist-credentials: false
+      - name: Checkout private Phase 9 engine
+        uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          ref: main
+          path: engine
+          persist-credentials: false
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install read-only audit dependencies
+        run: python -m pip install --quiet numpy pandas requests
+      - name: Read immutable private evidence and evaluate source dates
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+          PYTHONPATH: engine
+        run: python engine/scripts/audit_phase9_live.py --calendar public/calendar/upcoming.json
+      - name: Ensure no public provider artifacts remain
+        if: always()
+        run: |
+          test ! -e .artifacts/source-intake-report.json
+          test ! -e phase9-provider-values.json
