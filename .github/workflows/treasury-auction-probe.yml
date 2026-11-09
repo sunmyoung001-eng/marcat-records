@@ -44,6 +44,10 @@ jobs:
           assert all(x["forecast_signal_approved"] is False for x in d["events"])
           print("TREASURY_PRIVATE_NONPREDICTIVE_DATES_READBACK_VERIFIED")
           PY
+      - name: Store Treasury auction research in immutable private source archive
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python engine/scripts/push_newsroom_snapshot.py --kind treasury-auctions --input "$RUNNER_TEMP/treasury-2026-private.json"
       - name: Remove source research temp data
         if: always()
         run: rm -f "$RUNNER_TEMP/treasury-2026-private.json"
