@@ -42,6 +42,10 @@ jobs:
           assert all(e["first_publication_vintage_verified"] is False for e in data["events"])
           print("NBER_RESEARCH_ONLY_READBACK_VERIFIED")
           PY
+      - name: Store immutable NBER metadata in private marCat source archive
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python engine/scripts/push_newsroom_snapshot.py --kind nber-announcements --input "$RUNNER_TEMP/nber-research-only.json"
       - name: Remove private temporary research metadata
         if: always()
         run: rm -f "$RUNNER_TEMP/nber-research-only.json"
