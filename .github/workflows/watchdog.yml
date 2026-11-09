@@ -8,7 +8,27 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Phase 8 lock-aware watchdog
+        id: lock
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path("ops/forecast-release-gate.json")
+          if not path.exists(): raise SystemExit("missing release gate - fail closed")
+          x=json.loads(path.read_text())
+          if x.get("state")=="locked" and x.get("approved") is False:
+              print("FORECAST_LOCKED: expected pause, no daily prediction required")
+              with open(__import__("os").environ["GITHUB_OUTPUT"],"a") as f:
+                  f.write("locked=true\n")
+          elif x.get("state")=="released" and x.get("approved") is True and x.get("verified_gate_count")==48:
+              print("phase8 gate released; check legacy daily results")
+              with open(__import__("os").environ["GITHUB_OUTPUT"],"a") as f:
+                  f.write("locked=false\n")
+          else: raise SystemExit("invalid release gate; fail closed")
+          PY
       - name: Fail (-> email) if the last completed trading day has no record
+        if: steps.lock.outputs.locked == 'false'
         run: |
           python3 - <<'PY'
           import datetime as d, zoneinfo, pathlib, sys

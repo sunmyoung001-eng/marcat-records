@@ -1,0 +1,14 @@
+{
+  "schema": "marcat-supercat-forecast-release-gate-v1",
+  "state": "locked",
+  "approved": false,
+  "required_gate_count": 48,
+  "verified_gate_count": 40,
+  "preconditions": [
+    "8 SuperCat evidence",
+    "8 verified MasterCat operational handoff gates",
+    "separate forecast release authorization"
+  ],
+  "reason": "User requires all SuperCat integrity checks before any Nasdaq forecast publication",
+  "note": "This is a documented HOLD. Actual gate count is a historical snapshot and not an automatic permission switch."
+}

@@ -1,10 +1,11 @@
 name: daily-forecast
 on:
-  schedule:            # GitHub UTC cron may be delayed by hours; fail missed window rather than backdate
-    - cron: "35 12 * * 1-5"   # 08:35 ET during EDT
-    - cron: "50 12 * * 1-5"   # 08:50 ET during EDT, guarded retry
-    - cron: "35 13 * * 1-5"   # 08:35 ET during EST
-    - cron: "50 13 * * 1-5"   # 08:50 ET during EST, guarded retry
+  # MARCAT-054 Phase 8: publication cron intentionally disabled until every
+  # SuperCat passes the 48/48 operational gate and a separate release approval.
+  # This old forecast implementation remains versioned below but is hard-disabled.
+  push:
+    branches: [main]
+    paths: ['.github/workflows/daily.yml', 'ops/forecast-release-gate.json']
   workflow_dispatch:
     inputs:
       force:
@@ -17,7 +18,26 @@ concurrency:
 permissions:
   contents: write
 jobs:
+  forecast_lock_verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce Phase 8 default-deny release lock
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path("ops/forecast-release-gate.json").read_text())
+          assert x["schema"]=="marcat-supercat-forecast-release-gate-v1"
+          assert x["state"]=="locked"
+          assert x["approved"] is False
+          assert x["verified_gate_count"] < x["required_gate_count"] == 48
+          print("FORECAST_LOCKED: no regular or manual publication")
+          PY
   publish:
+    # Hard-stop independently of JSON or secrets. No schedule trigger and
+    # no workflow_dispatch/Worker call can run the old publisher.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
