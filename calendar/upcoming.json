@@ -1,20 +1,9 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-10T22:22:36Z",
-  "collected_date_et": "2026-11-10",
-  "event_count": 47,
+  "collected_at_utc": "2026-11-11T07:44:21Z",
+  "collected_date_et": "2026-11-11",
+  "event_count": 46,
   "events": [
-    {
-      "attention_tier_hypothesis": "high",
-      "category": "inflation",
-      "event_id": "FRED:release_10:2026-11-10",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-10",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Consumer Price Index"
-    },
     {
       "attention_tier_hypothesis": "high",
       "category": "labor",
@@ -524,7 +513,7 @@
   ],
   "forecast_signal_approved": false,
   "historical_results_included": false,
-  "horizon_end_et": "2027-11-10",
+  "horizon_end_et": "2027-11-11",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
     "fomc_future": 4,
