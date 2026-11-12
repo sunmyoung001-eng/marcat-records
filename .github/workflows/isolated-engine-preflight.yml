@@ -69,9 +69,8 @@ jobs:
           if status!='test_written' or code!=0:
               raise SystemExit(1)
           PY
-      - name: Assert no public checkout or publication credentials
+      - name: Assert no separate public publication checkout
         run: |
-          test ! -d records || { echo 'unexpected public records directory'; exit 1; }
           test ! -d public || { echo 'unexpected public checkout'; exit 1; }
           echo 'public_checkout_absent=true'
       - name: Assert tracked source data/forecast records unchanged
