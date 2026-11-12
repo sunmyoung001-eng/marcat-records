@@ -1,7 +1,7 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-11T23:28:02Z",
-  "collected_date_et": "2026-11-11",
+  "collected_at_utc": "2026-11-12T08:19:06Z",
+  "collected_date_et": "2026-11-12",
   "event_count": 46,
   "events": [
     {
@@ -513,7 +513,7 @@
   ],
   "forecast_signal_approved": false,
   "historical_results_included": false,
-  "horizon_end_et": "2027-11-11",
+  "horizon_end_et": "2027-11-12",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
     "fomc_future": 4,
