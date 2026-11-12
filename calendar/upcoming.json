@@ -1,8 +1,8 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-12T19:23:51Z",
+  "collected_at_utc": "2026-11-12T19:30:32Z",
   "collected_date_et": "2026-11-12",
-  "event_count": 46,
+  "event_count": 50,
   "events": [
     {
       "attention_tier_hypothesis": "high",
@@ -259,6 +259,17 @@
     },
     {
       "attention_tier_hypothesis": "high",
+      "category": "monetary_policy",
+      "event_id": "FederalReserve:fomc_meeting_end:2026-12-09",
+      "official_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "scheduled_date_et": "2026-12-09",
+      "scheduled_time_et": null,
+      "source": "FederalReserve",
+      "time_verified": false,
+      "title": "FOMC meeting (planned end date)"
+    },
+    {
+      "attention_tier_hypothesis": "high",
       "category": "inflation",
       "event_id": "FRED:release_10:2026-12-10",
       "official_url": "https://fred.stlouisfed.org/releases",
@@ -480,6 +491,17 @@
     {
       "attention_tier_hypothesis": "high",
       "category": "monetary_policy",
+      "event_id": "FederalReserve:fomc_meeting_end:2027-03-17",
+      "official_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "scheduled_date_et": "2027-03-17",
+      "scheduled_time_et": null,
+      "source": "FederalReserve",
+      "time_verified": false,
+      "title": "FOMC meeting (planned end date)"
+    },
+    {
+      "attention_tier_hypothesis": "high",
+      "category": "monetary_policy",
       "event_id": "FederalReserve:fomc_meeting_end:2027-04-28",
       "official_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
       "scheduled_date_et": "2027-04-28",
@@ -491,9 +513,31 @@
     {
       "attention_tier_hypothesis": "high",
       "category": "monetary_policy",
+      "event_id": "FederalReserve:fomc_meeting_end:2027-06-09",
+      "official_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "scheduled_date_et": "2027-06-09",
+      "scheduled_time_et": null,
+      "source": "FederalReserve",
+      "time_verified": false,
+      "title": "FOMC meeting (planned end date)"
+    },
+    {
+      "attention_tier_hypothesis": "high",
+      "category": "monetary_policy",
       "event_id": "FederalReserve:fomc_meeting_end:2027-07-28",
       "official_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
       "scheduled_date_et": "2027-07-28",
+      "scheduled_time_et": null,
+      "source": "FederalReserve",
+      "time_verified": false,
+      "title": "FOMC meeting (planned end date)"
+    },
+    {
+      "attention_tier_hypothesis": "high",
+      "category": "monetary_policy",
+      "event_id": "FederalReserve:fomc_meeting_end:2027-09-15",
+      "official_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "scheduled_date_et": "2027-09-15",
       "scheduled_time_et": null,
       "source": "FederalReserve",
       "time_verified": false,
@@ -516,7 +560,7 @@
   "horizon_end_et": "2027-11-12",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
-    "fomc_future": 4,
+    "fomc_future": 8,
     "fred_future_types": 20,
     "fred_release_types": 22
   },

@@ -1,0 +1,19 @@
+{
+  "added": 4,
+  "added_ids": [
+    "FederalReserve:fomc_meeting_end:2026-12-09",
+    "FederalReserve:fomc_meeting_end:2027-03-17",
+    "FederalReserve:fomc_meeting_end:2027-06-09",
+    "FederalReserve:fomc_meeting_end:2027-09-15"
+  ],
+  "detected_by_marcat_at_utc": "2026-11-12T19:30:32Z",
+  "first_observed_by_marcat_not_source_publication": true,
+  "first_snapshot": false,
+  "forecast_changed": false,
+  "historical_archive_used": false,
+  "modified": 0,
+  "modified_ids": [],
+  "removed": 0,
+  "removed_ids": [],
+  "schema": "marcat-calendar-change-log-v1"
+}
