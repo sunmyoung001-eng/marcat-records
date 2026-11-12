@@ -32,6 +32,7 @@ jobs:
           PYTHONUNBUFFERED: '1'
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           TEST_RUN_ID: 'diagnostic-${{ github.run_id }}'
+          PUBLIC_DIR: ''
         run: |
           set +e
           python scripts/run_daily.py --force > "${RUNNER_TEMP}/preflight-private.log" 2>&1
@@ -68,10 +69,15 @@ jobs:
           if status!='test_written' or code!=0:
               raise SystemExit(1)
           PY
+      - name: Assert no public checkout or publication credentials
+        run: |
+          test ! -d records || { echo 'unexpected public records directory'; exit 1; }
+          test ! -d public || { echo 'unexpected public checkout'; exit 1; }
+          echo 'public_checkout_absent=true'
       - name: Assert tracked source data/forecast records unchanged
         working-directory: engine
         run: |
-          if git status --porcelain -- data records | grep .; then
+          if git status --porcelain --untracked-files=all -- data records | grep .; then
             echo 'unexpected tracked data change'; exit 1
           fi
           echo 'tracked_source_data_unchanged=true'
