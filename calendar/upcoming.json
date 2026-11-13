@@ -1,20 +1,9 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-13T01:49:25Z",
-  "collected_date_et": "2026-11-12",
-  "event_count": 50,
+  "collected_at_utc": "2026-11-13T13:06:01Z",
+  "collected_date_et": "2026-11-13",
+  "event_count": 49,
   "events": [
-    {
-      "attention_tier_hypothesis": "high",
-      "category": "labor",
-      "event_id": "FRED:release_180:2026-11-12",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-12",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Unemployment Insurance Weekly Claims Report"
-    },
     {
       "attention_tier_hypothesis": "high",
       "category": "inflation",
@@ -557,7 +546,7 @@
   ],
   "forecast_signal_approved": false,
   "historical_results_included": false,
-  "horizon_end_et": "2027-11-12",
+  "horizon_end_et": "2027-11-13",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
     "fomc_future": 8,
