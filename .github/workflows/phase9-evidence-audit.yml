@@ -16,9 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: Checkout public calendar dates only
+      - name: Checkout current public main calendar dates only
         uses: actions/checkout@v4
         with:
+          ref: main
           path: public
           persist-credentials: false
       - name: Checkout private Phase 9 engine
