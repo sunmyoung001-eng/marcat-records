@@ -24,8 +24,7 @@ jobs:
           OBSERVATION_ACTOR: ${{ github.actor }}
           OBSERVATION_CRON: ${{ github.event.schedule }}
         run: |
-          printf 'event=%s actor=%s cron=%s run=%s attempt=%s\n' \\
-            "$OBSERVATION_EVENT" "$OBSERVATION_ACTOR" "$OBSERVATION_CRON" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+          printf 'event=%s actor=%s cron=%s run=%s attempt=%s\n' "$OBSERVATION_EVENT" "$OBSERVATION_ACTOR" "$OBSERVATION_CRON" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
       - name: Checkout private marCat code only
         uses: actions/checkout@v4
         with:
