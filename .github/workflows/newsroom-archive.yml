@@ -1,7 +1,8 @@
 name: marCat Private Newsroom Snapshot
-# MARCAT-058 one-shot replay to record exact previous observation dates.
-# Trigger remains scoped to workflow-file changes; public forecast still locked.
 on:
+  schedule:
+    # Weekday observation after JPX and after the US pre-open window.
+    - cron: '17 14 * * 1-5'
   push:
     branches: [main]
     paths:
@@ -17,6 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
+      - name: Record actual observation trigger
+        env:
+          OBSERVATION_EVENT: ${{ github.event_name }}
+          OBSERVATION_ACTOR: ${{ github.actor }}
+          OBSERVATION_CRON: ${{ github.event.schedule }}
+        run: |
+          printf 'event=%s actor=%s cron=%s run=%s attempt=%s\n' \\
+            "$OBSERVATION_EVENT" "$OBSERVATION_ACTOR" "$OBSERVATION_CRON" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
       - name: Checkout private marCat code only
         uses: actions/checkout@v4
         with:
