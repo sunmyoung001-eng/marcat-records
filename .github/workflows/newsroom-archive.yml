@@ -32,6 +32,7 @@ jobs:
           token: ${{ secrets.ENGINE_TOKEN }}
           ref: main
           path: engine
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -57,6 +58,19 @@ jobs:
         env:
           ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
         run: python engine/scripts/push_newsroom_snapshot.py --kind mastercat-inbox --input "${RUNNER_TEMP}/mastercat-inbox.json"
+      - name: Generate deterministic private rule briefing
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+        run: |
+          python scripts/generate_rule_briefing.py \
+            --archived-source "${RUNNER_TEMP}/newsroom-snapshot.json" \
+            --inbox "${RUNNER_TEMP}/mastercat-inbox.json" \
+            --output "${RUNNER_TEMP}/rule-briefing.json"
+      - name: Append rule briefing to the private archive and verify bytes
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python engine/scripts/push_newsroom_snapshot.py --kind rule-briefing --input "${RUNNER_TEMP}/rule-briefing.json"
       - name: Erase ephemeral observations
         if: always()
-        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json" "${RUNNER_TEMP}/mastercat-inbox.json"
+        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json" "${RUNNER_TEMP}/mastercat-inbox.json" "${RUNNER_TEMP}/rule-briefing.json"
