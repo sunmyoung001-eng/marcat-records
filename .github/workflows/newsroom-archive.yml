@@ -2,7 +2,7 @@ name: marCat Private Newsroom Snapshot
 on:
   schedule:
     # Weekday observation after JPX and after the US pre-open window.
-    - cron: '17 14 * * 1-5'
+    - cron: '29 14 * * 1-5'
   push:
     branches: [main]
     paths:
