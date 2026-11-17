@@ -1,8 +1,8 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-17T14:23:00Z",
+  "collected_at_utc": "2026-11-17T23:51:31Z",
   "collected_date_et": "2026-11-17",
-  "event_count": 48,
+  "event_count": 49,
   "events": [
     {
       "attention_tier_hypothesis": "medium",
@@ -80,6 +80,17 @@
       "source": "FRED",
       "time_verified": false,
       "title": "Manufacturing Business Outlook Survey"
+    },
+    {
+      "attention_tier_hypothesis": "medium",
+      "category": "growth",
+      "event_id": "FRED:release_13:2026-11-24",
+      "official_url": "https://fred.stlouisfed.org/releases",
+      "scheduled_date_et": "2026-11-24",
+      "scheduled_time_et": null,
+      "source": "FRED",
+      "time_verified": false,
+      "title": "G.17 Industrial Production and Capacity Utilization"
     },
     {
       "attention_tier_hypothesis": "medium",

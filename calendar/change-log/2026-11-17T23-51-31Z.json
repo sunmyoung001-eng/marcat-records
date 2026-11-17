@@ -1,0 +1,16 @@
+{
+  "added": 1,
+  "added_ids": [
+    "FRED:release_13:2026-11-24"
+  ],
+  "detected_by_marcat_at_utc": "2026-11-17T23:51:31Z",
+  "first_observed_by_marcat_not_source_publication": true,
+  "first_snapshot": false,
+  "forecast_changed": false,
+  "historical_archive_used": false,
+  "modified": 0,
+  "modified_ids": [],
+  "removed": 0,
+  "removed_ids": [],
+  "schema": "marcat-calendar-change-log-v1"
+}
