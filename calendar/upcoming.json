@@ -1,53 +1,9 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-17T23:51:31Z",
-  "collected_date_et": "2026-11-17",
-  "event_count": 49,
+  "collected_at_utc": "2026-11-18T08:32:25Z",
+  "collected_date_et": "2026-11-18",
+  "event_count": 45,
   "events": [
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "growth",
-      "event_id": "FRED:release_13:2026-11-17",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-17",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "G.17 Industrial Production and Capacity Utilization"
-    },
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "inflation",
-      "event_id": "FRED:release_188:2026-11-17",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-17",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "U.S. Import and Export Price Indexes"
-    },
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "growth",
-      "event_id": "FRED:release_25:2026-11-17",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-17",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Manufacturing and Trade Inventories and Sales"
-    },
-    {
-      "attention_tier_hypothesis": "high",
-      "category": "consumer",
-      "event_id": "FRED:release_9:2026-11-17",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-17",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Advance Monthly Sales for Retail and Food Services"
-    },
     {
       "attention_tier_hypothesis": "medium",
       "category": "housing",
@@ -546,7 +502,7 @@
   ],
   "forecast_signal_approved": false,
   "historical_results_included": false,
-  "horizon_end_et": "2027-11-17",
+  "horizon_end_et": "2027-11-18",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
     "fomc_future": 9,
