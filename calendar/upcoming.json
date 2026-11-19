@@ -1,20 +1,9 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-19T02:33:09Z",
-  "collected_date_et": "2026-11-18",
-  "event_count": 45,
+  "collected_at_utc": "2026-11-19T14:25:31Z",
+  "collected_date_et": "2026-11-19",
+  "event_count": 44,
   "events": [
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "housing",
-      "event_id": "FRED:release_27:2026-11-18",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-18",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "New Residential Construction"
-    },
     {
       "attention_tier_hypothesis": "high",
       "category": "labor",
@@ -502,7 +491,7 @@
   ],
   "forecast_signal_approved": false,
   "historical_results_included": false,
-  "horizon_end_et": "2027-11-18",
+  "horizon_end_et": "2027-11-19",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
     "fomc_future": 9,
