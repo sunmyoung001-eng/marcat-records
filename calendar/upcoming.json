@@ -1,31 +1,9 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-19T23:34:56Z",
-  "collected_date_et": "2026-11-19",
-  "event_count": 44,
+  "collected_at_utc": "2026-11-20T08:32:01Z",
+  "collected_date_et": "2026-11-20",
+  "event_count": 42,
   "events": [
-    {
-      "attention_tier_hypothesis": "high",
-      "category": "labor",
-      "event_id": "FRED:release_180:2026-11-19",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-19",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Unemployment Insurance Weekly Claims Report"
-    },
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "regional_survey",
-      "event_id": "FRED:release_351:2026-11-19",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-19",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Manufacturing Business Outlook Survey"
-    },
     {
       "attention_tier_hypothesis": "medium",
       "category": "growth",
@@ -491,7 +469,7 @@
   ],
   "forecast_signal_approved": false,
   "historical_results_included": false,
-  "horizon_end_et": "2027-11-19",
+  "horizon_end_et": "2027-11-20",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
     "fomc_future": 9,
