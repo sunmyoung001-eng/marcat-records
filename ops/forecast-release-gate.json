@@ -3,7 +3,7 @@
   "state": "locked",
   "approved": false,
   "required_gate_count": 48,
-  "verified_gate_count": 41,
+  "verified_gate_count": 42,
   "preconditions": [
     "8 SuperCat evidence",
     "8 verified MasterCat operational handoff gates",
@@ -11,7 +11,7 @@
   ],
   "reason": "User requires all SuperCat integrity checks before any Nasdaq forecast publication",
   "note": "This is a documented HOLD. Actual gate count is a historical snapshot and not an automatic permission switch.",
-  "verified_at_utc": "2026-11-21T00:51:24Z",
+  "verified_at_utc": "2026-11-21T01:20:57Z",
   "department_gate_counts": {
     "base": 5,
     "vol": 5,
@@ -20,18 +20,28 @@
     "trend": 5,
     "macro": 5,
     "cal": 6,
-    "news": 5
+    "news": 6
   },
   "verified_operational_handoffs": [
-    "cal"
+    "cal",
+    "news"
   ],
-  "remaining_operational_handoffs": 7,
+  "remaining_operational_handoffs": 6,
   "evidence": {
     "calendar_recovery_run_id": 44846089347,
     "calendar_recovery_attempt": 2,
     "controlled_drill": true,
     "normal_calendar_consumption_run_id": 44846089243,
     "proof_sha256": "f53c95ad38c08e8d805cfcbfb8d22c36e5cbf7698eb2b8f0f13888a9b05bf18c",
-    "scope": "five selected FRED release families, date-only private MasterCat consumption; no predictive qualification"
+    "scope": "five selected FRED release families, date-only private MasterCat consumption; no predictive qualification",
+    "news": {
+      "recovery_run_id": 44848853911,
+      "recovery_attempt": 2,
+      "controlled_drill": true,
+      "normal_consumption_run_id": 44848853868,
+      "normal_consumption_attempt": 2,
+      "proof_sha256": "4aa56546a9ccaf75d7db4d41aa8b92f06360b4d8e4a52e6fd270bd29d74ab7e3",
+      "scope": "official Federal Reserve feed metadata-only private MasterCat consumption; no sentiment, direction, first-publication vintage or predictive qualification"
+    }
   }
 }
