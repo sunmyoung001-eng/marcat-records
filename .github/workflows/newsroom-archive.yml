@@ -85,7 +85,7 @@ jobs:
         env:
           ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
         run: python engine/scripts/push_newsroom_snapshot.py --kind mastercat-calendar-consumption --input "${RUNNER_TEMP}/mastercat-calendar-consumption.json"
-      - name: Consume official news and diagnose seven remaining departments
+      - name: Consume official news and six numerical reports with gate diagnostics
         working-directory: engine
         env:
           PYTHONPATH: .
