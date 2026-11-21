@@ -71,6 +71,20 @@ jobs:
         env:
           ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
         run: python engine/scripts/push_newsroom_snapshot.py --kind rule-briefing --input "${RUNNER_TEMP}/rule-briefing.json"
+      - name: Consume date-only CalendarCat report in MasterCat
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+        run: |
+          python scripts/consume_calendar_report.py \
+            --source "${RUNNER_TEMP}/newsroom-snapshot.json" \
+            --inbox "${RUNNER_TEMP}/mastercat-inbox.json" \
+            --briefing "${RUNNER_TEMP}/rule-briefing.json" \
+            --output "${RUNNER_TEMP}/mastercat-calendar-consumption.json"
+      - name: Archive MasterCat calendar consumption and verify private bytes
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python engine/scripts/push_newsroom_snapshot.py --kind mastercat-calendar-consumption --input "${RUNNER_TEMP}/mastercat-calendar-consumption.json"
       - name: Erase ephemeral observations
         if: always()
-        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json" "${RUNNER_TEMP}/mastercat-inbox.json" "${RUNNER_TEMP}/rule-briefing.json"
+        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json" "${RUNNER_TEMP}/mastercat-inbox.json" "${RUNNER_TEMP}/rule-briefing.json" "${RUNNER_TEMP}/mastercat-calendar-consumption.json"
