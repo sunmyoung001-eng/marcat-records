@@ -85,6 +85,20 @@ jobs:
         env:
           ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
         run: python engine/scripts/push_newsroom_snapshot.py --kind mastercat-calendar-consumption --input "${RUNNER_TEMP}/mastercat-calendar-consumption.json"
+      - name: Consume official news and diagnose seven remaining departments
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+        run: |
+          python scripts/consume_department_reports.py \
+            --source "${RUNNER_TEMP}/newsroom-snapshot.json" \
+            --inbox "${RUNNER_TEMP}/mastercat-inbox.json" \
+            --briefing "${RUNNER_TEMP}/rule-briefing.json" \
+            --output "${RUNNER_TEMP}/mastercat-department-consumption.json"
+      - name: Archive private department diagnosis and verify bytes
+        env:
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: python engine/scripts/push_newsroom_snapshot.py --kind mastercat-department-consumption --input "${RUNNER_TEMP}/mastercat-department-consumption.json"
       - name: Erase ephemeral observations
         if: always()
-        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json" "${RUNNER_TEMP}/mastercat-inbox.json" "${RUNNER_TEMP}/rule-briefing.json" "${RUNNER_TEMP}/mastercat-calendar-consumption.json"
+        run: rm -f "${RUNNER_TEMP}/newsroom-snapshot.json" "${RUNNER_TEMP}/mastercat-inbox.json" "${RUNNER_TEMP}/rule-briefing.json" "${RUNNER_TEMP}/mastercat-calendar-consumption.json" "${RUNNER_TEMP}/mastercat-department-consumption.json"
