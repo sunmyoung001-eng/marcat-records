@@ -1,0 +1,39 @@
+name: marCat NewsCat Operational Handoff Verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/news-handoff-verification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+# Share the existing collector mutex so private Git contents appends do not race.
+concurrency:
+  group: marcat-private-newsroom-archive
+  cancel-in-progress: false
+jobs:
+  news_handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout reviewed private consumer
+        uses: actions/checkout@v4
+        with:
+          repository: sunmyoung001-eng/marcat
+          token: ${{ secrets.ENGINE_TOKEN }}
+          ref: c07936d20f68c6bbf805781120b29bf843d012d9
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing provider dependencies
+        run: python -m pip install numpy pandas requests
+      # Attempt 1 deliberately exits 75 after real verified consumption and
+      # private failure-receipt readback. Rerun the same failed job once.
+      - name: Verify NewsCat consumption and controlled recovery
+        env:
+          PYTHONPATH: .
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/prove_news_handoff.py
