@@ -1,20 +1,9 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-24T23:00:29Z",
-  "collected_date_et": "2026-11-24",
-  "event_count": 42,
+  "collected_at_utc": "2026-11-25T09:51:06Z",
+  "collected_date_et": "2026-11-25",
+  "event_count": 41,
   "events": [
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "growth",
-      "event_id": "FRED:release_13:2026-11-24",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-24",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "G.17 Industrial Production and Capacity Utilization"
-    },
     {
       "attention_tier_hypothesis": "medium",
       "category": "housing",
@@ -469,7 +458,7 @@
   ],
   "forecast_signal_approved": false,
   "historical_results_included": false,
-  "horizon_end_et": "2027-11-24",
+  "horizon_end_et": "2027-11-25",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
     "fomc_future": 9,
