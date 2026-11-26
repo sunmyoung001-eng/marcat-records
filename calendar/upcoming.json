@@ -1,75 +1,9 @@
 {
   "classification": "official_future_schedule_public_dates_only",
-  "collected_at_utc": "2026-11-25T22:30:34Z",
-  "collected_date_et": "2026-11-25",
-  "event_count": 41,
+  "collected_at_utc": "2026-11-26T09:30:34Z",
+  "collected_date_et": "2026-11-26",
+  "event_count": 35,
   "events": [
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "housing",
-      "event_id": "FRED:release_148:2026-11-25",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-25",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Housing Units Authorized By Building Permits"
-    },
-    {
-      "attention_tier_hypothesis": "high",
-      "category": "labor",
-      "event_id": "FRED:release_180:2026-11-25",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-25",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Unemployment Insurance Weekly Claims Report"
-    },
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "housing",
-      "event_id": "FRED:release_27:2026-11-25",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-25",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "New Residential Construction"
-    },
-    {
-      "attention_tier_hypothesis": "high",
-      "category": "growth",
-      "event_id": "FRED:release_53:2026-11-25",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-25",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Gross Domestic Product"
-    },
-    {
-      "attention_tier_hypothesis": "high",
-      "category": "inflation",
-      "event_id": "FRED:release_54:2026-11-25",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-25",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "Personal Income and Outlays"
-    },
-    {
-      "attention_tier_hypothesis": "medium",
-      "category": "housing",
-      "event_id": "FRED:release_97:2026-11-25",
-      "official_url": "https://fred.stlouisfed.org/releases",
-      "scheduled_date_et": "2026-11-25",
-      "scheduled_time_et": null,
-      "source": "FRED",
-      "time_verified": false,
-      "title": "New Residential Sales"
-    },
     {
       "attention_tier_hypothesis": "medium",
       "category": "regional_survey",
@@ -458,7 +392,7 @@
   ],
   "forecast_signal_approved": false,
   "historical_results_included": false,
-  "horizon_end_et": "2027-11-25",
+  "horizon_end_et": "2027-11-26",
   "schema": "marcat-future-calendar-v1",
   "source_status_summary": {
     "fomc_future": 9,
